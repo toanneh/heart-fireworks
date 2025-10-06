@@ -2,104 +2,88 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Trái tim pháo hoa</title>
+  <title>Trái tim pháo hoa 3D</title>
   <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      background: #000;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    canvas {
-      display: block;
-    }
+    body { margin: 0; overflow: hidden; background: black; }
+    canvas { display: block; }
   </style>
 </head>
 <body>
-<canvas id="canvas"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/controls/OrbitControls.js"></script>
 <script>
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+camera.position.z = 100;
 
-function random(min, max) {
-  return Math.random() * (max - min) + min;
-}
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
 
-class Particle {
-  constructor(x, y, angle, speed, color) {
-    this.x = x;
-    this.y = y;
-    this.vx = Math.cos(angle) * speed;
-    this.vy = Math.sin(angle) * speed;
-    this.alpha = 1;
-    this.color = color;
-  }
+// Hạt trái tim
+const particles = 3000;
+const geometry = new THREE.BufferGeometry();
+const positions = [];
+const colors = [];
 
-  update() {
-    this.x += this.vx;
-    this.y += this.vy;
-    this.vy += 0.02; // gravity
-    this.alpha -= 0.01;
-  }
-
-  draw() {
-    ctx.globalAlpha = this.alpha;
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.globalAlpha = 1;
-  }
-}
-
-let particles = [];
-
-function heartShape(t) {
-  // công thức trái tim parametric
+function heartFunction(t) {
   const x = 16 * Math.pow(Math.sin(t), 3);
-  const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+  const y = 13 * Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t);
   return {x, y};
 }
 
-function createHeart(x, y) {
-  const color = `hsl(${Math.random()*360},100%,60%)`;
-  for (let i = 0; i < 100; i++) {
-    const t = Math.random() * Math.PI * 2;
-    const point = heartShape(t);
-    const px = x + point.x * 10;
-    const py = y + point.y * 10;
-    const angle = Math.atan2(py - y, px - x);
-    const speed = random(2, 5);
-    particles.push(new Particle(x, y, angle, speed, color));
-  }
+for (let i = 0; i < particles; i++) {
+  const t = Math.random() * Math.PI * 2;
+  const h = heartFunction(t);
+  const x = h.x * 2 + (Math.random() - 0.5) * 2;
+  const y = h.y * 2 + (Math.random() - 0.5) * 2;
+  const z = (Math.random() - 0.5) * 10;
+  positions.push(x, y, z);
+
+  colors.push(1.0, 0.9, 0.2); // vàng
 }
+
+geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+const material = new THREE.PointsMaterial({ size: 0.8, vertexColors: true });
+const points = new THREE.Points(geometry, material);
+scene.add(points);
+
+// Chữ xoay vòng
+const fontLoader = new THREE.FontLoader();
+fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function(font) {
+  const textGeo = new THREE.TextGeometry('Chúc Vân mùa Trung Thu ấm áp', {
+    font: font,
+    size: 3,
+    height: 0.5,
+    curveSegments: 12,
+  });
+  const textMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  const textMesh = new THREE.Mesh(textGeo, textMat);
+  textMesh.position.set(-40, -30, 0);
+  scene.add(textMesh);
+
+  function animateText() {
+    textMesh.rotation.y += 0.01;
+    requestAnimationFrame(animateText);
+  }
+  animateText();
+});
 
 function animate() {
-  ctx.fillStyle = "rgba(0,0,0,0.2)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  particles.forEach((p, i) => {
-    p.update();
-    p.draw();
-    if (p.alpha <= 0) particles.splice(i, 1);
-  });
-
   requestAnimationFrame(animate);
+  points.rotation.y += 0.002;
+  renderer.render(scene, camera);
 }
 
-setInterval(() => {
-  const x = random(canvas.width*0.3, canvas.width*0.7);
-  const y = random(canvas.height*0.3, canvas.height*0.7);
-  createHeart(x, y);
-}, 1500);
-
 animate();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
 </script>
 </body>
 </html>
-
