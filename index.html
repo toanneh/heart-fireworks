@@ -1,1 +1,105 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Trái tim pháo hoa</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: #000;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+function random(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+class Particle {
+  constructor(x, y, angle, speed, color) {
+    this.x = x;
+    this.y = y;
+    this.vx = Math.cos(angle) * speed;
+    this.vy = Math.sin(angle) * speed;
+    this.alpha = 1;
+    this.color = color;
+  }
+
+  update() {
+    this.x += this.vx;
+    this.y += this.vy;
+    this.vy += 0.02; // gravity
+    this.alpha -= 0.01;
+  }
+
+  draw() {
+    ctx.globalAlpha = this.alpha;
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+}
+
+let particles = [];
+
+function heartShape(t) {
+  // công thức trái tim parametric
+  const x = 16 * Math.pow(Math.sin(t), 3);
+  const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+  return {x, y};
+}
+
+function createHeart(x, y) {
+  const color = `hsl(${Math.random()*360},100%,60%)`;
+  for (let i = 0; i < 100; i++) {
+    const t = Math.random() * Math.PI * 2;
+    const point = heartShape(t);
+    const px = x + point.x * 10;
+    const py = y + point.y * 10;
+    const angle = Math.atan2(py - y, px - x);
+    const speed = random(2, 5);
+    particles.push(new Particle(x, y, angle, speed, color));
+  }
+}
+
+function animate() {
+  ctx.fillStyle = "rgba(0,0,0,0.2)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  particles.forEach((p, i) => {
+    p.update();
+    p.draw();
+    if (p.alpha <= 0) particles.splice(i, 1);
+  });
+
+  requestAnimationFrame(animate);
+}
+
+setInterval(() => {
+  const x = random(canvas.width*0.3, canvas.width*0.7);
+  const y = random(canvas.height*0.3, canvas.height*0.7);
+  createHeart(x, y);
+}, 1500);
+
+animate();
+</script>
+</body>
+</html>
 
