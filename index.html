@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Heart Gift for Love 💖</title>
+  <title>I Love U 💖</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     html, body {
@@ -12,6 +12,7 @@
       background: black;
       overflow: hidden;
     }
+
     canvas {
       position: absolute;
       top: 0;
@@ -20,40 +21,52 @@
       height: 100%;
     }
 
-    /* Hiệu ứng chữ I Love U ánh bạc */
+    /* ---- Hiệu ứng chữ I Love U ánh bạc trắng ---- */
     h1 {
       position: absolute;
       bottom: 40px;
       width: 100%;
       text-align: center;
-      color: #d9d9d9;
       font-family: "Segoe Script", "Brush Script MT", cursive;
-      font-size: 42px;
-      letter-spacing: 4px;
+      font-size: 46px;
+      letter-spacing: 5px;
+      background: linear-gradient(
+        90deg,
+        #e6e6e6,
+        #ffffff,
+        #bfbfbf,
+        #ffffff,
+        #e6e6e6
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       text-shadow: 
-        0 0 10px #ffffff,
-        0 0 20px #bfbfbf,
-        0 0 30px #f0f0f0,
-        0 0 40px #cccccc;
-      animation: silverGlow 2.5s infinite ease-in-out;
+        0 0 10px rgba(255, 255, 255, 0.8),
+        0 0 20px rgba(255, 255, 255, 0.6),
+        0 0 40px rgba(200, 200, 200, 0.4);
+      animation: silverShine 4s linear infinite, glowPulse 2s ease-in-out infinite;
     }
 
-    /* Nhấp nháy ánh bạc */
-    @keyframes silverGlow {
+    /* Hiệu ứng ánh bạc di chuyển (shine) */
+    @keyframes silverShine {
+      0% { background-position: -200px 0; }
+      100% { background-position: 200px 0; }
+    }
+
+    /* Hiệu ứng nhấp nháy mềm */
+    @keyframes glowPulse {
       0%, 100% {
-        color: #e0e0e0;
         text-shadow: 
-          0 0 5px #ffffff,
-          0 0 15px #bfbfbf,
-          0 0 25px #f0f0f0;
+          0 0 8px rgba(255, 255, 255, 0.8),
+          0 0 18px rgba(230, 230, 230, 0.6),
+          0 0 28px rgba(200, 200, 200, 0.4);
         opacity: 0.9;
       }
       50% {
-        color: #fdfdfd;
         text-shadow: 
-          0 0 20px #ffffff,
-          0 0 35px #e6e6e6,
-          0 0 55px #ffffff;
+          0 0 15px rgba(255, 255, 255, 1),
+          0 0 35px rgba(255, 255, 255, 0.9),
+          0 0 55px rgba(230, 230, 230, 0.8);
         opacity: 1;
       }
     }
@@ -61,7 +74,7 @@
 </head>
 <body>
   <canvas id="pinkboard"></canvas>
-  <h1>I Love U 💞</h1>
+  <h1>I Love U </h1>
 
   <script>
     var settings = {
@@ -74,6 +87,7 @@
       },
     };
 
+    // Polyfill cho requestAnimationFrame
     (function () {
       var lastTime = 0;
       var vendors = ['ms', 'moz', 'webkit', 'o'];
@@ -99,26 +113,16 @@
         };
     })();
 
-    function Point(x, y) {
-      this.x = x || 0;
-      this.y = y || 0;
-    }
-    Point.prototype.clone = function () {
-      return new Point(this.x, this.y);
-    };
+    // -------- Class cơ bản --------
+    function Point(x, y) { this.x = x || 0; this.y = y || 0; }
+    Point.prototype.clone = function () { return new Point(this.x, this.y); };
     Point.prototype.length = function (length) {
-      if (typeof length == "undefined")
-        return Math.sqrt(this.x * this.x + this.y * this.y);
-      this.normalize();
-      this.x *= length;
-      this.y *= length;
-      return this;
+      if (typeof length == "undefined") return Math.sqrt(this.x * this.x + this.y * this.y);
+      this.normalize(); this.x *= length; this.y *= length; return this;
     };
     Point.prototype.normalize = function () {
       var length = this.length();
-      this.x /= length;
-      this.y /= length;
-      return this;
+      this.x /= length; this.y /= length; return this;
     };
 
     function Particle() {
@@ -128,10 +132,8 @@
       this.age = 0;
     }
     Particle.prototype.initialize = function (x, y, dx, dy) {
-      this.position.x = x;
-      this.position.y = y;
-      this.velocity.x = dx;
-      this.velocity.y = dy;
+      this.position.x = x; this.position.y = y;
+      this.velocity.x = dx; this.velocity.y = dy;
       this.acceleration.x = dx * settings.particles.effect;
       this.acceleration.y = dy * settings.particles.effect;
       this.age = 0;
@@ -144,18 +146,10 @@
       this.age += deltaTime;
     };
     Particle.prototype.draw = function (context, image) {
-      function ease(t) {
-        return (--t) * t * t + 1;
-      }
+      function ease(t) { return (--t) * t * t + 1; }
       var size = image.width * ease(this.age / settings.particles.duration);
       context.globalAlpha = 1 - this.age / settings.particles.duration;
-      context.drawImage(
-        image,
-        this.position.x - size / 2,
-        this.position.y - size / 2,
-        size,
-        size
-      );
+      context.drawImage(image, this.position.x - size / 2, this.position.y - size / 2, size, size);
     };
 
     function ParticlePool(length) {
@@ -175,30 +169,26 @@
     };
     ParticlePool.prototype.update = function (deltaTime) {
       var i;
-      if (this.firstActive < this.firstFree) {
+      if (this.firstActive < this.firstFree)
         for (i = this.firstActive; i < this.firstFree; i++)
           this.particles[i].update(deltaTime);
-      }
       if (this.firstFree < this.firstActive) {
         for (i = this.firstActive; i < this.particles.length; i++)
           this.particles[i].update(deltaTime);
         for (i = 0; i < this.firstFree; i++)
           this.particles[i].update(deltaTime);
       }
-      while (
-        this.particles[this.firstActive].age >= this.duration &&
-        this.firstActive != this.firstFree
-      ) {
+      while (this.particles[this.firstActive].age >= this.duration &&
+        this.firstActive != this.firstFree) {
         this.firstActive++;
         if (this.firstActive == this.particles.length) this.firstActive = 0;
       }
     };
     ParticlePool.prototype.draw = function (context, image) {
       var i;
-      if (this.firstActive < this.firstFree) {
+      if (this.firstActive < this.firstFree)
         for (i = this.firstActive; i < this.firstFree; i++)
           this.particles[i].draw(context, image);
-      }
       if (this.firstFree < this.firstActive) {
         for (i = this.firstActive; i < this.particles.length; i++)
           this.particles[i].draw(context, image);
@@ -213,6 +203,7 @@
         particleRate = settings.particles.length / settings.particles.duration,
         time;
 
+      // Hiệu ứng trái tim đập
       function pointOnHeart(t, beatTime) {
         let beat = 1 + 0.05 * Math.sin(beatTime * 6);
         return new Point(
@@ -226,6 +217,7 @@
         );
       }
 
+      // Tạo ảnh trái tim màu đỏ
       var image = (function () {
         var canvas = document.createElement("canvas"),
           context = canvas.getContext("2d");
@@ -233,12 +225,8 @@
         canvas.height = settings.particles.size;
         function to(t) {
           var point = pointOnHeart(t, 0);
-          point.x =
-            settings.particles.size / 2 +
-            point.x * settings.particles.size / 350;
-          point.y =
-            settings.particles.size / 2 -
-            point.y * settings.particles.size / 350;
+          point.x = settings.particles.size / 2 + point.x * settings.particles.size / 350;
+          point.y = settings.particles.size / 2 - point.y * settings.particles.size / 350;
           return point;
         }
         context.beginPath();
@@ -258,6 +246,7 @@
         return image;
       })();
 
+      // Hàm render chính
       function render() {
         requestAnimationFrame(render);
         var newTime = new Date().getTime() / 1000;
