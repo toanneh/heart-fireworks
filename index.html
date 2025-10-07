@@ -19,22 +19,37 @@
       width: 100%;
       height: 100%;
     }
+
+    /* Hiệu ứng chữ I Love U */
     h1 {
       position: absolute;
       bottom: 40px;
       width: 100%;
       text-align: center;
-      color: #ff99c8;
+      color: #ff0000;
       font-family: "Comic Sans MS", cursive, sans-serif;
-      font-size: 32px;
-      text-shadow: 0 0 20px #ff99c8;
-      opacity: 0.9;
+      font-size: 38px;
+      letter-spacing: 3px;
+      text-shadow: 0 0 15px #ff4d4d, 0 0 25px #ff0000;
+      animation: glowBlink 2s infinite ease-in-out;
+    }
+
+    /* Hiệu ứng nhấp nháy và phát sáng */
+    @keyframes glowBlink {
+      0%, 100% {
+        opacity: 0.8;
+        text-shadow: 0 0 10px #ff4d4d, 0 0 20px #ff0000, 0 0 40px #ff1a1a;
+      }
+      50% {
+        opacity: 1;
+        text-shadow: 0 0 20px #ff8080, 0 0 40px #ff3333, 0 0 60px #ff1a1a;
+      }
     }
   </style>
 </head>
 <body>
   <canvas id="pinkboard"></canvas>
-  <h1>I Love You 💖</h1>
+  <h1>I Love U 💞</h1>
 
   <script>
     var settings = {
@@ -230,7 +245,7 @@
           context.lineTo(point.x, point.y);
         }
         context.closePath();
-        context.fillStyle = "#ff3366";
+        context.fillStyle = "#ff0000"; // màu đỏ
         context.fill();
         var image = new Image();
         image.src = canvas.toDataURL();
