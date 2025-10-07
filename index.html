@@ -20,29 +20,41 @@
       height: 100%;
     }
 
-    /* Hiệu ứng chữ I Love U */
+    /* Hiệu ứng chữ I Love U ánh bạc */
     h1 {
       position: absolute;
       bottom: 40px;
       width: 100%;
       text-align: center;
-      color: #ff0000;
-      font-family: "Comic Sans MS", cursive, sans-serif;
-      font-size: 38px;
-      letter-spacing: 3px;
-      text-shadow: 0 0 15px #ff4d4d, 0 0 25px #ff0000;
-      animation: glowBlink 2s infinite ease-in-out;
+      color: #d9d9d9;
+      font-family: "Segoe Script", "Brush Script MT", cursive;
+      font-size: 42px;
+      letter-spacing: 4px;
+      text-shadow: 
+        0 0 10px #ffffff,
+        0 0 20px #bfbfbf,
+        0 0 30px #f0f0f0,
+        0 0 40px #cccccc;
+      animation: silverGlow 2.5s infinite ease-in-out;
     }
 
-    /* Hiệu ứng nhấp nháy và phát sáng */
-    @keyframes glowBlink {
+    /* Nhấp nháy ánh bạc */
+    @keyframes silverGlow {
       0%, 100% {
-        opacity: 0.8;
-        text-shadow: 0 0 10px #ff4d4d, 0 0 20px #ff0000, 0 0 40px #ff1a1a;
+        color: #e0e0e0;
+        text-shadow: 
+          0 0 5px #ffffff,
+          0 0 15px #bfbfbf,
+          0 0 25px #f0f0f0;
+        opacity: 0.9;
       }
       50% {
+        color: #fdfdfd;
+        text-shadow: 
+          0 0 20px #ffffff,
+          0 0 35px #e6e6e6,
+          0 0 55px #ffffff;
         opacity: 1;
-        text-shadow: 0 0 20px #ff8080, 0 0 40px #ff3333, 0 0 60px #ff1a1a;
       }
     }
   </style>
@@ -62,7 +74,6 @@
       },
     };
 
-    // Polyfill requestAnimationFrame
     (function () {
       var lastTime = 0;
       var vendors = ['ms', 'moz', 'webkit', 'o'];
@@ -88,7 +99,6 @@
         };
     })();
 
-    // Point class
     function Point(x, y) {
       this.x = x || 0;
       this.y = y || 0;
@@ -111,7 +121,6 @@
       return this;
     };
 
-    // Particle class
     function Particle() {
       this.position = new Point();
       this.velocity = new Point();
@@ -149,7 +158,6 @@
       );
     };
 
-    // ParticlePool class
     function ParticlePool(length) {
       this.particles = new Array(length);
       for (var i = 0; i < this.particles.length; i++)
@@ -199,7 +207,6 @@
       }
     };
 
-    // Main
     (function (canvas) {
       var context = canvas.getContext("2d"),
         particles = new ParticlePool(settings.particles.length),
@@ -207,7 +214,7 @@
         time;
 
       function pointOnHeart(t, beatTime) {
-        let beat = 1 + 0.05 * Math.sin(beatTime * 6); // nhịp đập
+        let beat = 1 + 0.05 * Math.sin(beatTime * 6);
         return new Point(
           beat * 160 * Math.pow(Math.sin(t), 3),
           beat *
@@ -219,7 +226,6 @@
         );
       }
 
-      // create particle image
       var image = (function () {
         var canvas = document.createElement("canvas"),
           context = canvas.getContext("2d");
@@ -245,7 +251,7 @@
           context.lineTo(point.x, point.y);
         }
         context.closePath();
-        context.fillStyle = "#ff0000"; // màu đỏ
+        context.fillStyle = "#ff0000";
         context.fill();
         var image = new Image();
         image.src = canvas.toDataURL();
